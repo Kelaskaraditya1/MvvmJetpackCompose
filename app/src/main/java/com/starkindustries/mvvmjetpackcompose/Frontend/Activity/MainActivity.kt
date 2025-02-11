@@ -11,10 +11,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.starkindustries.mvvmjetpackcompose.Api.TweetsApi
+import com.starkindustries.mvvmjetpackcompose.Frontend.Navigation.Navigation
+import com.starkindustries.mvvmjetpackcompose.Frontend.Screens.CategoriesScreen
+import com.starkindustries.mvvmjetpackcompose.Frontend.Screens.TweetsScreen
+import com.starkindustries.mvvmjetpackcompose.ViewModels.TweetsViewModel
 import com.starkindustries.mvvmjetpackcompose.ui.theme.MvvmJetpackComposeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -28,44 +34,18 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MvvmJetpackComposeTheme {
-
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LaunchedEffect(Unit) {
-                        try {
-                            val response = tweetsApi.getQuotes("\$..tweets[?(@.category=='android-development')]")
-                            if (response.isSuccessful) {
-                                Log.d("Category",response.body().toString())
-                            }else{
-                                Log.d("CategoryError",response.code().toString()+" "+response.message().toString())
-                            }
-                        } catch (e: Exception) {
-                            Log.e("NETWORK_ERROR", "Exception: ${e.message}")
-                        }
-
-
-                    }
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                Application()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun Application(){
+
+    var tweetsViewModel:TweetsViewModel = viewModel()
+    var tweetList = tweetsViewModel.tweets.collectAsState()
+    Log.d("Tweets",tweetList.value.toString())
+    Navigation()
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MvvmJetpackComposeTheme {
-        Greeting("Android")
-    }
-}
